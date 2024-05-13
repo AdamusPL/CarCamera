@@ -46,6 +46,9 @@ chk_person = tk.Checkbutton(root, text='People', variable=check_person_var)
 check_bollard_var = tk.IntVar()
 chk_bollard = tk.Checkbutton(root, text='Bollard', variable=check_bollard_var)
 
+# check_wall_var = tk.IntVar()
+# chk_wall = tk.Checkbutton(root, text='Wall', variable=check_wall_var)
+
 
 def parameter_window():
     root.title("Choose parameters")
@@ -106,6 +109,7 @@ def parameter_window():
     chk_car.pack()
     chk_person.pack()
     chk_bollard.pack()
+    # chk_wall.pack()
     confirm.pack()
 
     root.mainloop()

@@ -1,6 +1,6 @@
-# RiPO > 2024-05-13 7:26pm
-https://universe.roboflow.com/trylogy/ripo-vopt8
+# BollardsCarsPeopleWallsDetector > 2024-05-13 10:47pm
+https://universe.roboflow.com/bollards/bollardscarspeoplewallsdetector
 
 Provided by a Roboflow user
-License: CC BY 4.0
+License: Public Domain
 

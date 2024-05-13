@@ -67,6 +67,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         # bollard - 0
         # car - 1
         # person - 2
+        # wall - 3
 
         selected_classes = []
 
@@ -78,6 +79,9 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
 
         if chk_person:
             selected_classes.append(2)
+
+        # if chk_wall:
+        #     selected_classes.append(3)
 
         detections = detections[np.isin(detections.class_id, selected_classes)]
 
