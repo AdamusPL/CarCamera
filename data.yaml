@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['bollards', 'car', 'person', 'wall']
+
+roboflow:
+  workspace: bollards
+  project: bollardscarspeoplewallsdetector
+  version: 1
+  license: Public Domain
+  url: https://universe.roboflow.com/bollards/bollardscarspeoplewallsdetector/dataset/1
