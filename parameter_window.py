@@ -11,11 +11,11 @@ width.insert(0, "925")
 
 number_of_lines_variable = tk.StringVar(root)
 number_of_lines = tk.Entry(root, textvariable=number_of_lines_variable)
-number_of_lines.insert(0, "7")
+number_of_lines.insert(0, "5")
 
 space_between_lines_variable = tk.StringVar(root)
 space_between_lines = tk.Entry(root, textvariable=space_between_lines_variable)
-space_between_lines.insert(0, "100")
+space_between_lines.insert(0, "150")
 
 angle_of_lines_variable = tk.StringVar(root)
 angle_of_lines = tk.Entry(root, textvariable=angle_of_lines_variable)

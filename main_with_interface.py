@@ -6,12 +6,15 @@ from ultralytics import YOLO
 
 import supervision as sv
 import numpy as np
+from pygame import mixer
 
 import torch
 
 print(torch.cuda.is_available())
 print(torch.cuda.device_count())
 print(torch.cuda.get_device_name(0))
+
+mixer.init()
 
 
 def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
@@ -44,7 +47,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
          angle_of_lines):
     # define a video capture object
     args = parse_arguments()
-    video_path = "videos/2024-04-17 17-42-13.mp4"
+    video_path = "videos/2024-04-17 17-43-43.mp4"
     vid = cv2.VideoCapture(video_path)
 
     model = YOLO("best.pt")
@@ -115,6 +118,8 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         # Line thickness of 9 px
         thickness = 9
 
+        middle_line_array = []
+
         # draw lines on camera
         for i in range(start_draw_lines_y, end_draw_lines_y, -space_between_lines):
             # draw left edge line
@@ -123,6 +128,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
             # draw right edge line
             draw_line(start_drawing_bottom_right, height_of_line, middle_line_right_x, i, nr_of_line, frame, thickness)
 
+            middle_line_array.append((i, nr_of_line))
             height_of_line = i
             start_drawing_bottom_left = middle_line_left_x
             start_drawing_bottom_right = middle_line_right_x
@@ -140,10 +146,40 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
             middle_line_left_x += angle_of_lines
             middle_line_right_x -= angle_of_lines
 
+        cv2.namedWindow("WindowName", cv2.WINDOW_FULLSCREEN)
         cv2.imshow('frame', frame)
         # the 'q' button is set as the
         # quitting button you may use any
-        # desired button of your choice
+        # desired button of your
+
+        min = 0
+        have_to_play = False
+
+        # find the closest object
+        for i in range(len(detections.xyxy)):
+            if detections.xyxy[i, 3] > min and detections.xyxy[i, 3] >= end_draw_lines_y + space_between_lines:
+                min = detections.xyxy[i, 3]
+                have_to_play = True
+
+        # find the closest line to that object
+        min_distance = 2000
+        saved_line = ()
+        for element in middle_line_array:
+            if abs(element[0] - min) < min_distance:
+                min_distance = abs(element[0] - min)
+                saved_line = element
+
+        # play sound if there's an obstacle and if player is not playing already
+        if have_to_play:
+            if not mixer.music.get_busy():
+                if saved_line[1] == 0 or saved_line[1] == 1:
+                    mixer.music.load('sounds/beepRed.mp3')
+                elif saved_line[1] == 2 or saved_line[1] == 3:
+                    mixer.music.load('sounds/beepOrange.mp3')
+                else:
+                    mixer.music.load('sounds/beepGreen.mp3')
+                mixer.music.play()
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
