@@ -47,7 +47,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
          angle_of_lines):
     # define a video capture object
     args = parse_arguments()
-    video_path = "videos/2024-04-17 17-43-43.mp4"
+    video_path = "videos/2024-04-17 17-59-08.mp4"
     vid = cv2.VideoCapture(video_path)
 
     model = YOLO("best.pt")
@@ -128,7 +128,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
             # draw right edge line
             draw_line(start_drawing_bottom_right, height_of_line, middle_line_right_x, i, nr_of_line, frame, thickness)
 
-            middle_line_array.append((i, nr_of_line))
+            middle_line_array.append((i, nr_of_line, middle_line_left_x, middle_line_right_x))
             height_of_line = i
             start_drawing_bottom_left = middle_line_left_x
             start_drawing_bottom_right = middle_line_right_x
@@ -152,22 +152,28 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         # quitting button you may use any
         # desired button of your
 
-        min = 0
+        bottom_y_box_closest = 0
+        x_left_box = 0
+        x_right_box = 0
         have_to_play = False
 
         # find the closest object
         for i in range(len(detections.xyxy)):
-            if detections.xyxy[i, 3] > min and detections.xyxy[i, 3] >= end_draw_lines_y + space_between_lines:
-                min = detections.xyxy[i, 3]
-                have_to_play = True
+            if detections.xyxy[i, 3] > bottom_y_box_closest and detections.xyxy[i, 3] >= end_draw_lines_y + space_between_lines:
+                bottom_y_box_closest = detections.xyxy[i, 3]
+                x_left_box = detections.xyxy[i, 0]
+                x_right_box = detections.xyxy[i, 2]
 
         # find the closest line to that object
         min_distance = 2000
         saved_line = ()
         for element in middle_line_array:
-            if abs(element[0] - min) < min_distance:
-                min_distance = abs(element[0] - min)
+            if abs(element[0] - bottom_y_box_closest) < min_distance:
+                min_distance = abs(element[0] - bottom_y_box_closest)
                 saved_line = element
+
+        if saved_line[2] <= x_left_box <= saved_line[3] or saved_line[2] <= x_right_box <= saved_line[3]:
+            have_to_play = True
 
         # play sound if there's an obstacle and if player is not playing already
         if have_to_play:
