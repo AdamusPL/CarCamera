@@ -36,17 +36,8 @@ def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
     frame = cv2.line(image, start_point, end_point, color, thickness)
 
 
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="YOLOv8 live")
-    parser.add_argument("--webcam-resolution", default=[1920, 1080], nargs=2, type=int)
-    args = parser.parse_args()
-    return args
-
-
 def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines, space_between_lines,
          angle_of_lines, confidence, filepath):
-    # define a video capture object
-    args = parse_arguments()
     video_path = filepath  # "videos/2024-04-17 17-59-08.mp4"
     vid = cv2.VideoCapture(video_path)
 
