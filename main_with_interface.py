@@ -1,4 +1,5 @@
 import argparse
+from tkinter import filedialog
 
 import cv2
 
@@ -36,10 +37,22 @@ def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
     frame = cv2.line(image, start_point, end_point, color, thickness)
 
 
-def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines, space_between_lines,
-         angle_of_lines, confidence, filepath):
-    video_path = filepath  # "videos/2024-04-17 17-59-08.mp4"
-    vid = cv2.VideoCapture(video_path)
+def main(chk_car, chk_person, chk_bollard, chk_wall, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines, space_between_lines,
+         angle_of_lines, confidence, camera_var, mode_var):
+
+    if mode_var == "Camera":
+        vid = cv2.VideoCapture(int(camera_var))
+
+    elif mode_var == "File":
+        file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.avi;*.mov;*.mkv")])
+        if file_path:
+            vid = cv2.VideoCapture(file_path)
+
+
+    if not vid.isOpened():
+        print("Error while opening a video source")
+        cv2.destroyAllWindows()
+        exit(-1)
 
     model = YOLO("best.pt")
 
@@ -53,7 +66,10 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         # Capture the video frame
         # by frame
         ret, frame = vid.read()
-        # frame = frame[crop_y1:crop_y2, crop_x1:crop_x2]
+        if not ret:
+            cv2.destroyAllWindows()
+            break
+        frame = frame[crop_y1:crop_y2, crop_x1:crop_x2]
 
         result = model(frame, agnostic_nms=True)[0]
         detections = sv.Detections.from_yolov8(result)
@@ -74,8 +90,8 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         if chk_person:
             selected_classes.append(2)
 
-        # if chk_wall:
-        #     selected_classes.append(3)
+        if chk_wall:
+            selected_classes.append(3)
 
         detections = detections[np.isin(detections.class_id, selected_classes)]
 
@@ -139,7 +155,7 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
             middle_line_left_x += angle_of_lines
             middle_line_right_x -= angle_of_lines
 
-        cv2.namedWindow("WindowName", cv2.WINDOW_FULLSCREEN)
+        #cv2.namedWindow("WindowName", cv2.WINDOW_FULLSCREEN)
         cv2.imshow('frame', frame)
         # the 'q' button is set as the
         # quitting button you may use any

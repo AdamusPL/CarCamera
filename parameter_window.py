@@ -1,13 +1,32 @@
 import tkinter as tk
+from tkinter import ttk
+
+import cv2
+
 import main_with_interface
 
 from tkinter import *
+
+
+def detect_cameras(max_cameras=2):
+    available_cameras = []
+    for i in range(max_cameras):
+        cap = cv2.VideoCapture(i)
+        if cap.isOpened():
+            available_cameras.append(i)
+            cap.release()
+    return available_cameras
+
 
 buttonClicked = False
 root = tk.Tk()
 width_variable = tk.StringVar(root)
 width = tk.Entry(root, textvariable=width_variable)
 width.insert(0, "925")
+
+cameras = detect_cameras()
+camera_var = tk.StringVar()
+camera_var.set(cameras[0] if cameras else "No cameras found")
 
 number_of_lines_variable = tk.StringVar(root)
 number_of_lines = tk.Entry(root, textvariable=number_of_lines_variable)
@@ -37,26 +56,36 @@ crop_y2_variable = tk.StringVar(root)
 crop_y2 = tk.Entry(root, textvariable=crop_y2_variable)
 crop_y2.insert(0, "1080")
 
-check_car_var = tk.IntVar()
-chk_car = tk.Checkbutton(root, text='Cars', variable=check_car_var)
+check_car_var = tk.IntVar(value=1)
+chk_car = tk.Checkbutton(root, text='Cars', variable=check_car_var, onvalue=1, offvalue=0)
 
-check_person_var = tk.IntVar()
-chk_person = tk.Checkbutton(root, text='People', variable=check_person_var)
+check_person_var = tk.IntVar(value=1)
+chk_person = tk.Checkbutton(root, text='People', variable=check_person_var, onvalue=1, offvalue=0)
 
-check_bollard_var = tk.IntVar()
-chk_bollard = tk.Checkbutton(root, text='Bollard', variable=check_bollard_var)
+check_bollard_var = tk.IntVar(value=1)
+chk_bollard = tk.Checkbutton(root, text='Bollard', variable=check_bollard_var, onvalue=1, offvalue=0)
+
+check_wall_var = tk.IntVar(value=1)
+chk_wall = tk.Checkbutton(root, text='Wall', variable=check_wall_var, onvalue=1, offvalue=0)
 
 confidence_var = tk.StringVar(root)
 confidence = tk.Entry(root, textvariable=confidence_var)
 confidence.insert(0, "0.3")
 
-filepath_var = tk.StringVar(root)
-filepath = tk.Entry(root, textvariable=filepath_var)
-filepath.insert(0, "Enter filepath")
+
+def on_mode_change(event):
+    if mode_var.get() == "Camera":
+        camera_menu.config(state="normal")
+    else:
+        camera_menu.config(state="disabled")
 
 
-# check_wall_var = tk.IntVar()
-# chk_wall = tk.Checkbutton(root, text='Wall', variable=check_wall_var)
+mode_var = tk.StringVar(value="Camera")
+mode_menu = ttk.Combobox(root, textvariable=mode_var, values=["Camera", "File"])
+mode_menu.bind("<<ComboboxSelected>>", on_mode_change)
+
+
+camera_menu = ttk.Combobox(root, textvariable=camera_var, values=cameras)
 
 
 def parameter_window():
@@ -91,12 +120,13 @@ def parameter_window():
     confidence_label = Label(root, text="Detection confidence")
     confidence_label.config(font=("Courier", 14))
 
-    filepath_label = Label(root, text="Choose file to run detection")
+    filepath_label = Label(root, text="Choose source to run detection on")
     filepath_label.config(font=("Courier", 14))
 
     confirm = Button(text="Confirm",
                      command=lambda: main_with_interface.main(check_car_var.get(), check_person_var.get(),
                                                               check_bollard_var.get(),
+                                                              check_wall_var.get(),
                                                               int(crop_x1_variable.get()),
                                                               int(crop_x2_variable.get()),
                                                               int(crop_y1_variable.get()),
@@ -106,7 +136,8 @@ def parameter_window():
                                                               int(space_between_lines_variable.get()),
                                                               int(angle_of_lines_variable.get()),
                                                               float(confidence_var.get()),
-                                                              filepath_var.get()))
+                                                              camera_var.get(),
+                                                              mode_var.get()))
 
     title.pack()
     crop_x_label.pack()
@@ -127,11 +158,14 @@ def parameter_window():
     chk_car.pack()
     chk_person.pack()
     chk_bollard.pack()
+    chk_wall.pack()
     confidence_label.pack()
     confidence.pack()
     filepath_label.pack()
-    filepath.pack()
-    # chk_wall.pack()
+    mode_menu.pack()
+    camera_menu.pack()
     confirm.pack()
+
+    on_mode_change(None)
 
     root.mainloop()
