@@ -42,11 +42,17 @@ def main(chk_car, chk_person, chk_bollard, chk_wall, crop_x1, crop_x2, crop_y1, 
 
     if mode_var == "Camera":
         vid = cv2.VideoCapture(int(camera_var))
+        vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
     elif mode_var == "File":
         file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.avi;*.mov;*.mkv")])
         if file_path:
             vid = cv2.VideoCapture(file_path)
+        else:
+            print("File choosing failed")
+            cv2.destroyAllWindows()
+            exit(-1)
 
 
     if not vid.isOpened():
