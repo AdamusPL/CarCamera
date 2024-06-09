@@ -70,12 +70,10 @@ def main(chk_car, chk_person, chk_bollard, chk_wall, crop_x1, crop_x2, crop_y1, 
         # Capture the video frame
         # by frame
         ret, frame = vid.read()
-        print(frame.shape)
         if not ret:
             cv2.destroyAllWindows()
             break
         frame = frame[crop_y1:crop_y2, crop_x1:crop_x2]
-        print(frame.shape)
 
         result = model(frame, agnostic_nms=True)[0]
         detections = sv.Detections.from_yolov8(result)
