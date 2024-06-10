@@ -1,4 +1,5 @@
 import argparse
+from tkinter import filedialog
 
 import cv2
 
@@ -23,7 +24,6 @@ def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
     # represents the bottom right corner of image
     end_point = (x2, y2)
 
-    # Green color in BGR
     if nr_of_line == 0 or nr_of_line == 1:
         color = (0, 0, 255)
     elif nr_of_line == 2 or nr_of_line == 3:
@@ -36,19 +36,26 @@ def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
     frame = cv2.line(image, start_point, end_point, color, thickness)
 
 
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="YOLOv8 live")
-    parser.add_argument("--webcam-resolution", default=[1920, 1080], nargs=2, type=int)
-    args = parser.parse_args()
-    return args
+def main(chk_car, chk_person, chk_bollard, chk_wall, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines,
+         space_between_lines, angle_of_lines, confidence, camera_var, mode_var):
+    if mode_var == "Camera":
+        vid = cv2.VideoCapture(int(camera_var))
+        vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        vid.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
+    elif mode_var == "File":
+        file_path = filedialog.askopenfilename(filetypes=[("Video files", "*.mp4;*.avi;*.mov;*.mkv")])
+        if file_path:
+            vid = cv2.VideoCapture(file_path)
+        else:
+            print("File choosing failed")
+            cv2.destroyAllWindows()
+            exit(-1)
 
-def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines, space_between_lines,
-         angle_of_lines):
-    # define a video capture object
-    args = parse_arguments()
-    video_path = "videos/2024-04-17 17-59-08.mp4"
-    vid = cv2.VideoCapture(video_path)
+    if not vid.isOpened():
+        print("Error while opening a video source")
+        cv2.destroyAllWindows()
+        exit(-1)
 
     model = YOLO("best.pt")
 
@@ -62,6 +69,9 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         # Capture the video frame
         # by frame
         ret, frame = vid.read()
+        if not ret:
+            cv2.destroyAllWindows()
+            break
         frame = frame[crop_y1:crop_y2, crop_x1:crop_x2]
 
         result = model(frame, agnostic_nms=True)[0]
@@ -83,10 +93,12 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
         if chk_person:
             selected_classes.append(2)
 
-        # if chk_wall:
-        #     selected_classes.append(3)
+        if chk_wall:
+            selected_classes.append(3)
 
         detections = detections[np.isin(detections.class_id, selected_classes)]
+
+        detections = detections[detections.confidence > confidence]
 
         labels = []
         for element in detections:
@@ -95,25 +107,21 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
 
         frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
 
-        # space_between_lines = 100
         start_draw_lines_y = crop_y2
         # modify for height:
         end_draw_lines_y = start_draw_lines_y - nr_of_lines * space_between_lines
 
         height_of_line = crop_y2
-        left_edge_x = 50
-        right_edge_x = 100
 
         # modify for width:
         # offset = 725
         middle = int(abs(crop_x2 - crop_x1) / 2)
-        middle_line_left_x = middle - offset
-        middle_line_right_x = middle + offset
+        middle_line_left_x = middle - int(offset / 2)
+        middle_line_right_x = middle + int(offset / 2)
         nr_of_line = 0
 
-        const = 150
-        start_drawing_bottom_left = middle_line_left_x + const
-        start_drawing_bottom_right = middle_line_right_x - const
+        start_drawing_bottom_left = middle_line_left_x
+        start_drawing_bottom_right = middle_line_right_x
 
         # Line thickness of 9 px
         thickness = 9
@@ -142,11 +150,11 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
             nr_of_line += 1
 
             # modify for angle of lines:
-            # angle_of_lines = 110
             middle_line_left_x += angle_of_lines
             middle_line_right_x -= angle_of_lines
 
-        cv2.namedWindow("WindowName", cv2.WINDOW_FULLSCREEN)
+        # cv2.namedWindow("frame", cv2.WND_PROP_FULLSCREEN)
+        # cv2.setWindowProperty("frame", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow('frame', frame)
         # the 'q' button is set as the
         # quitting button you may use any
@@ -159,7 +167,8 @@ def main(chk_car, chk_person, chk_bollard, crop_x1, crop_x2, crop_y1, crop_y2, o
 
         # find the closest object
         for i in range(len(detections.xyxy)):
-            if detections.xyxy[i, 3] > bottom_y_box_closest and detections.xyxy[i, 3] >= end_draw_lines_y + space_between_lines:
+            if detections.xyxy[i, 3] > bottom_y_box_closest and detections.xyxy[
+                i, 3] >= end_draw_lines_y + space_between_lines:
                 bottom_y_box_closest = detections.xyxy[i, 3]
                 x_left_box = detections.xyxy[i, 0]
                 x_right_box = detections.xyxy[i, 2]

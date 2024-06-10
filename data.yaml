@@ -2,12 +2,12 @@ train: ../train/images
 val: ../valid/images
 test: ../test/images
 
-nc: 4
-names: ['bollards', 'car', 'person', 'wall']
+nc: 3
+names: ['bollard', 'car', 'person']
 
 roboflow:
-  workspace: bollards
-  project: bollardscarspeoplewallsdetector
-  version: 1
-  license: Public Domain
-  url: https://universe.roboflow.com/bollards/bollardscarspeoplewallsdetector/dataset/1
+  workspace: trylogy
+  project: ripo-vopt8
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/trylogy/ripo-vopt8/dataset/3
