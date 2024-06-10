@@ -19,8 +19,9 @@ root = tk.Tk()
 options_frame = Frame(root)
 canvas = tk.Canvas(root, width=960, height=540, bg='white')
 
-width_variable = tk.Scale(options_frame, from_=700, to=1920, orient='horizontal')
-width_variable.set(925)
+width_variable = tk.StringVar(root)
+width = Entry(options_frame, textvariable=width_variable)
+width.insert(0, "925")
 
 cameras = detect_cameras()
 camera_var = tk.StringVar()
@@ -102,7 +103,6 @@ def draw_line(x1, y1, x2, y2, nr_of_line, thickness):
 
 
 def update_lines():
-
     space_between_lines = int(space_between_lines_variable.get()) // 2
     nr_of_lines = int(number_of_lines_variable.get())
     angle_of_lines = int(angle_of_lines_variable.get()) // 2
@@ -173,20 +173,21 @@ def parameter_window():
 
     buttons = Frame(options_frame)
     confirm = Button(buttons, text="Confirm",
-                     command=lambda: (root.destroy(), main_with_interface.main(check_car_var.get(), check_person_var.get(),
-                                                              check_bollard_var.get(),
-                                                              check_wall_var.get(),
-                                                              int(crop_x1_variable.get()),
-                                                              int(crop_x2_variable.get()),
-                                                              int(crop_y1_variable.get()),
-                                                              int(crop_y2_variable.get()),
-                                                              int(width_variable.get()),
-                                                              int(number_of_lines_variable.get()),
-                                                              int(space_between_lines_variable.get()),
-                                                              int(angle_of_lines_variable.get()),
-                                                              float(confidence_var.get()),
-                                                              camera_var.get(),
-                                                              mode_var.get())))
+                     command=lambda: (
+                         root.destroy(), main_with_interface.main(check_car_var.get(), check_person_var.get(),
+                                                                  check_bollard_var.get(),
+                                                                  check_wall_var.get(),
+                                                                  int(crop_x1_variable.get()),
+                                                                  int(crop_x2_variable.get()),
+                                                                  int(crop_y1_variable.get()),
+                                                                  int(crop_y2_variable.get()),
+                                                                  int(width_variable.get()),
+                                                                  int(number_of_lines_variable.get()),
+                                                                  int(space_between_lines_variable.get()),
+                                                                  int(angle_of_lines_variable.get()),
+                                                                  float(confidence_var.get()),
+                                                                  camera_var.get(),
+                                                                  mode_var.get())))
     confirm.pack(side=tk.LEFT)
     check = Button(buttons, text="Check lines", command=update_lines)
     check.pack(side=tk.RIGHT)
@@ -199,7 +200,7 @@ def parameter_window():
     crop_y1.pack()
     crop_y2.pack()
     width_label.pack()
-    width_variable.pack()
+    width.pack()
     number_of_lines_label.pack()
     number_of_lines.pack()
     space_between_lines_label.pack()
@@ -219,6 +220,7 @@ def parameter_window():
 
     on_mode_change(None)
     root.mainloop()
+
 
 if __name__ == '__main__':
     parameter_window()
