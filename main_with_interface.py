@@ -37,8 +37,7 @@ def draw_line(x1, y1, x2, y2, nr_of_line, image, thickness):
 
 
 def main(chk_car, chk_person, chk_bollard, chk_wall, crop_x1, crop_x2, crop_y1, crop_y2, offset, nr_of_lines,
-         space_between_lines,
-         angle_of_lines, confidence, camera_var, mode_var):
+         space_between_lines, angle_of_lines, confidence, camera_var, mode_var):
     if mode_var == "Camera":
         vid = cv2.VideoCapture(int(camera_var))
         vid.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
