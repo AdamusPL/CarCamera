@@ -45,7 +45,7 @@ crop_x1.insert(0, "0")
 
 crop_x2_variable = tk.StringVar(root)
 crop_x2 = Entry(options_frame, textvariable=crop_x2_variable)
-crop_x2.insert(0, "960")
+crop_x2.insert(0, "1920")
 
 crop_y1_variable = tk.StringVar(root)
 crop_y1 = Entry(options_frame, textvariable=crop_y1_variable)
@@ -53,7 +53,7 @@ crop_y1.insert(0, "0")
 
 crop_y2_variable = tk.StringVar(root)
 crop_y2 = Entry(options_frame, textvariable=crop_y2_variable)
-crop_y2.insert(0, "540")
+crop_y2.insert(0, "1080")
 
 check_frame = Frame(options_frame)
 
@@ -103,20 +103,17 @@ def draw_line(x1, y1, x2, y2, nr_of_line, thickness):
 
 
 def update_lines():
-    crop_x1 = int(crop_x1_variable.get())
-    crop_x2 = int(crop_x2_variable.get())
-    crop_y1 = int(crop_y1_variable.get())
-    crop_y2 = int(crop_y2_variable.get())
+
     space_between_lines = int(space_between_lines_variable.get()) // 2
     nr_of_lines = int(number_of_lines_variable.get())
     angle_of_lines = int(angle_of_lines_variable.get()) // 2
     offset = int(width_variable.get()) // 2
     canvas.delete("all")
 
-    start_draw_lines_y = crop_y2
-    end_draw_lines_y = max(crop_y1, crop_y2 - nr_of_lines * space_between_lines)
-    height_of_line = crop_y2
-    middle = (crop_x2 + crop_x1) // 2
+    start_draw_lines_y = 540
+    end_draw_lines_y = 540 - nr_of_lines * space_between_lines
+    height_of_line = 540
+    middle = 960 / 2
     middle_line_left_x = middle - offset // 2
     middle_line_right_x = middle + offset // 2
     nr_of_line = 0
